@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class RessourceManager
 {
 //	Le format du fichier airports.dat 
-	private static final String airport_file = "airports.dat";
+	private static final String airport_file = "res/airports.dat";
 	private static final int nomVille = 0;
 	private static final int nomPays = 1;
 	private static final int codeIATA = 2;
@@ -24,13 +24,15 @@ public class RessourceManager
 	private static final int longitude = 4;
 	
 //	Le format du fichier flight.dat 
-	private static final String flights_file = "flights.dat";
+	private static final String flights_file = "res/flights.dat";
 	private static final int idVol = 0;
 	private static final int departCodeIATA = 1;
 	private static final int arriveeCodeIATA = 2;
 	private static final int codeCompanie = 3;
 	private static final int modelAvion	 = 4;
 	
+//	Le format du fichier flight.dat 
+	private static final String realtime_flights = "res/realtime_flights.dat";
 	public static HashMap<String, Aeroport> loadAeroport()
 	{
 		
@@ -90,7 +92,50 @@ public class RessourceManager
 		
 		return returnValue;
 	}
+	private static long lastTime = 1496159669370L;
+	private static long newTime = 1496159669370L;
+
+	public static void print(long t)
+	{
+		try(BufferedReader bufRead = new BufferedReader(new FileReader(realtime_flights)))
+		{
+			String line;
+			String[] array;
+			lastTime = newTime;
+			newTime += t;
+			while((line = bufRead.readLine()) != null)
+			{
+				array = line.split("///");
+				long tps = Long.parseLong(array[0]);
+				
+				if(tps <= newTime && tps >= lastTime)
+					System.out.println("time: "+array[0]+"vol :"+array[1]+" latitude: "+array[2]+" longitude: " +array[3]);
+				
+			}
+			
+			bufRead.close();
+		}catch(IOException e){}
+		
+	}
 	
 	
-	
+	public static void run()
+	{
+		long startTime;
+        long urdTime;
+        long waitTime;
+        while (true) {
+            startTime = System.nanoTime();
+            urdTime = (System.nanoTime() - startTime) / 1000000;
+            waitTime = 1000 / 30 - urdTime;
+            print(1000);
+            try {
+                Thread.sleep(waitTime);
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+        if(newTime >= 1496195547396L)
+        	break;
+        }
+	}
 }
